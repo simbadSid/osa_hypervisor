@@ -1,0 +1,9 @@
+#forget the .o
+*.o
+*.d
+build/
+#forget executable
+emul
+sockcon
+.settings
+

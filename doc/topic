@@ -1,0 +1,8 @@
+It is an Eclipse project, you can simply copy it to an Eclipse workspace, and then import it as a project.
+
+You must single step through it using the GNU debuger (gdb).
+GDB is very well integrated in Eclipse, so we strongly suggest you use Eclipse or a comparable IDE. Eclipse makes it easier to navigate through the code base and easier even to debug.
+
+
+The following week, you will be asked to write an emulation of the MMU and of the different devices so that you can run all the given sample programs.
+

@@ -1,0 +1,47 @@
+
+This project is about building a small and simple hypervisor, 
+using an interpreter design.
+
+The entry point is the main function in main.c.
+As you will see, the emulation starts by assembling a program
+in memory and then reset the virtual core at address 0x0000-0000.
+
+The small embedded assembler can be found in parser.c.
+
+Small sample programs can be found under samples.
+In the end, you should be able to run all of these samples.
+However, out of the box, only one sample works: test.asm.
+
+Here is how to compile and launch the emulator:
+
+	$ cd edu.mosig.aaos.emul
+	$ make clean ; make all
+	$ ./emul samples/test.asm
+	
+Because the debug mode is turned on by default, you should see
+the output of the assembler first and then the output of the
+core that echoes each individual instruction it executes.
+See the Makefile to see how to turn that off.
+
+You are asked to do the following:
+
+1) You must read and understand all the sources that have been provided
+   to you. This means that you should be able to explain in details how
+   it works.
+   
+2) You are asked to add the emulation of the devices specified in the ISA.
+	- the serial line
+	- the timer
+	
+   For the emulation of a serial line, we provided you with a program
+   to emulate a serial line from within a regular linux terminal,
+   please look at sockcon (sockcon.c sockcon.h).
+
+3) You are then asked to add the emulation of the MMU, as specified by the ISA.
+
+4) Check that you can run all the given samples.
+   
+Have fun.
+
+
+

@@ -1,0 +1,38 @@
+
+This is the README about the socket console (SOCKCON) program that we provided you.
+This program is here to help you with the emulation of a serial line.
+
+When started in a Linux terminal, the sockcon program will try continuously to connect
+to the emulation, in order to "plug in" the serial line. This connection, through a local
+unix socket domain, is the hardware equivalent of wiring the electric lines to the
+UART chip on the board.
+
+Once connected, the sockcon behaves as a full-duplex console.
+
+	- Whatever you type is sent through the socket.
+	- Whatever is received from the socket is echoed on the screen
+
+So this is a software emulation of a keyboard/screen combo.
+
+ --- ATTENTION --- ATTENTION --- ATTENTION ---   
+
+You must pay attention to the details here, we said
+that what is typed is sent, but it is not echoed locally. 
+So unless you have an echo on the emulation side, nothing will
+appear. 
+
+We provided with a sample that just does that, it is called serial.asm.
+You must already have your interrupts working, since it relies on an 
+interrupt handler.
+
+The serial.asm is a simple echo program, reading from the serial RX and
+echoing everything to the serial TX. With this simple behavior, you have
+a console with sockcon, you will see what you type.
+
+Side Note:
+  To achieve the sockcon behavior, we had to modify the terminal setting.
+  This is interesting to look at the code in the main function of the 
+  sockcon program in order to understand what is going on.
+   
+Have fun.
+
