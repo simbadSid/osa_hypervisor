@@ -81,7 +81,7 @@ void parse(FILE *program, uint8_t* memory, uint32_t entry_point)
 	size_t size = 16;
 	int readen;
 	uint32_t pc = entry_point;
-//	instr_t inst;
+	instr_t inst;
 
 	for (;;)
 	{

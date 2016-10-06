@@ -1,12 +1,12 @@
-
 OBJDIR=build
+SRCDIR=src
 CFLAGS  = -g -Wall -Werror -MP -MMD -DCONFIG_DEBUG
-LDFLAGS  = -g 
+LDFLAGS  = -g
 
 OBJS = core.o parser.o echoi.o main.o bus.o
 
-$(OBJDIR)/%.o : ./%.c
-	gcc -c $(CFLAGS) $(OPTFLAGS) -o $@ $< 
+$(OBJDIR)/%.o : $(SRCDIR)/%.c
+	gcc -c $(CFLAGS) $(OPTFLAGS) -o $@ $<
 
 -include $(wildcard $(OBJDIR)/*.d)
 
