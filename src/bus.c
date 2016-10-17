@@ -45,9 +45,16 @@ on the bus.
 #include "bus.h"
 #include "core.h"
 
-extern uint8_t *memory; // physical memory array, allocate globally
-extern struct core* core; // registers and all
-extern struct bus* bus;
+
+
+
+extern uint8_t		*memory;	// physical memory array, allocate globally
+extern struct core	*core;		// registers and all
+extern struct bus	*bus;
+
+
+
+
 
 /**
  * This is part of emulating either a serial line or a network card.
@@ -163,15 +170,16 @@ void bus_serial_accept() {
  * initialization of all the devices whose controllers are
  * attached on the bus.
  */
-void bus_init() {
-  strcpy(bus->serial.name,".serial");
-  bus->serial.status |= TX_AVAILABLE;
+void bus_init()
+{
+	strcpy(bus->serial.name,".serial");
+	bus->serial.status |= TX_AVAILABLE;
 
-  // You must turn this back on, so that the emulation accept
-  // a connection from the sockcon program...
-#if 0
+	// You must turn this back on, so that the emulation accept
+	// a connection from the sockcon program...
+//#if 0
   bus_serial_accept();
-#endif
+//#endif
 }
 
 /**
@@ -179,7 +187,13 @@ void bus_init() {
  * It is called after every instruction fetched, decoded, and
  * executed by the core.
  */
-void bus_emul_devices(void) {
+void bus_emul_devices(void)
+{
+// TODO to implement
+// TODO 	tick(horloge),
+// TODO tick(ti;er-,
+// TODO get(ligne_serie)
+
 }
 
 /*

@@ -36,8 +36,14 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-void usage() {
-  printf("./sockcons -s:name[,server] \n");
+
+
+
+
+
+void usage()
+{
+	printf("./sockcons -s:name[,server] \n");
 }
 
 /**
@@ -47,25 +53,28 @@ void usage() {
  * via a file. This is called from the client side of the unix socket
  * domain in order to establish a connection.
  */
-int unix_socket_connect(char * file) {
-  struct sockaddr_un addr;
-  size_t addr_length;
-  int sock;
+int unix_socket_connect(char * file)
+{
+	struct sockaddr_un addr;
+	size_t addr_length;
+	int sock;
 
-  sock = socket(PF_UNIX, SOCK_STREAM, 0);
-  if (sock < 0) {
-    perror("Socket create failed:");
-    shutdown(sock,SHUT_RDWR);
-    return -1;
-  }
-  addr.sun_family = AF_UNIX;
-  addr_length = sizeof(addr.sun_family) + sprintf(addr.sun_path, "%s", file);
-  if (connect(sock, (struct sockaddr *) &addr, addr_length) < 0) {
-    // perror("Socket connect failed:");
-    shutdown(sock,SHUT_RDWR);
-    return -1;
-  }
-  return sock;
+	sock = socket(PF_UNIX, SOCK_STREAM, 0);
+	if (sock < 0)
+	{
+		perror("Socket create failed:");
+		shutdown(sock,SHUT_RDWR);
+		return -1;
+	}
+	addr.sun_family = AF_UNIX;
+	addr_length = sizeof(addr.sun_family) + sprintf(addr.sun_path, "%s", file);
+	if (connect(sock, (struct sockaddr *) &addr, addr_length) < 0)
+	{
+		// perror("Socket connect failed:");
+		shutdown(sock,SHUT_RDWR);
+		return -1;
+	}
+	return sock;
 }
 
 /**
@@ -74,16 +83,18 @@ int unix_socket_connect(char * file) {
  * It provides the accept incoming connections.
  * In normal operation, this is blocking until a connection is made.
  */
-int unix_socket_accept(int sock) {
-  int client;
-  struct sockaddr_un address;
-  socklen_t length = sizeof(address);
+int unix_socket_accept(int sock)
+{
+	int client;
+	struct sockaddr_un address;
+	socklen_t length = sizeof(address);
 
-  client = accept(sock, (struct sockaddr *) &address, &length);
-  if (client == -1 && errno != EAGAIN) {
-    perror("unix_socket_accept");
-  }
-  return client;
+	client = accept(sock, (struct sockaddr *) &address, &length);
+	if (client == -1 && errno != EAGAIN)
+	{
+		perror("unix_socket_accept");
+	}
+	return client;
 }
 
 /**
@@ -171,8 +182,9 @@ struct termios tp, save;
  * so that your Linux terminal behaves normally when this
  * process will exit.
  */
-void __exit(void) {
-  tcsetattr(STDIN_FILENO, TCSAFLUSH, &save);
+void __exit(void)
+{
+	tcsetattr(STDIN_FILENO, TCSAFLUSH, &save);
 }
 
 /**
@@ -184,115 +196,143 @@ void __exit(void) {
  * To emulate a serial line, we must turn off both
  * the buffering and the local echo.
  */
-void stdin_setup() {
-  // Retrieve current terminal settings
-  if (tcgetattr(STDIN_FILENO, &tp) == -1)
-      exit(-1);
-  // save it so that we can restore it on exit
-  save = tp;
-  /*
-   * turn off echo and buffering, so that each character
-   * typed is sent immediately to our emulation.
-   */
-  tp.c_lflag &= ~(ICANON | ECHO);
-  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &tp) == -1)
-      exit(-1);
+void stdin_setup()
+{
+	if (tcgetattr(STDIN_FILENO, &tp) == -1)				// Retrieve current terminal settings
+		exit(-1);
 
-  // now set the callback at exit time
-  // so we can restore a normal setting before exiting.
-  atexit(__exit);
+	save = tp;											// save it so that we can restore it on exit
+	tp.c_lflag &= ~(ICANON | ECHO);						// turn off echo and buffering, so that each character
+														// typed is sent immediately to our emulation.
+
+	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &tp) == -1)
+		exit(-1);
+
+	atexit(__exit);										// now set the callback at exit time
+														// so we can restore a normal setting before exiting.
 }
 
-int main(int argc, char **argv) {
 
-  stdin_setup();
 
-  /*
-   * Let's start by parsing the arguments.
-   */
-  int c;
-  char *name;
-  int servermode = 0;
-  while ((c = getopt(argc, argv, "s:")) != EOF) {
-    switch (c) {
-    case 's': {
-      optarg++;
-      char * coma = strchr(optarg, ',');
-      if (coma != NULL) {
-        int length = coma - optarg;
-        name = malloc(length + 1);
-        strncpy(name, optarg, length);
-        name[length]='\0';
-        if (strncmp(coma + 1, "server", 6) == 0) {
-          servermode = 1;
-          printf("server socket name=[%s]\n", name);
-        } else
-          printf("client socket name=[%s]\n", name);
 
-      } else {
-        int length = strlen(optarg);
-        name = malloc(length + 1);
-        strcpy(name, optarg);
-        printf("client socket name=[%s]\n", name);
-      }
-      break;
-    }
-    default:
-      usage();
-    }
-  }
-  /*
-   * Let's see if we are to act as a client, connect to a server socket
-   * or a server, waiting for a client to connect.
-   */
-  int sock= -1;
-  if (servermode) {
-    int ssock = -1;
-    ssock = unix_socket_bind(name);
-    // fcntl(server, F_SETFL, O_NONBLOCK); // for non-blocking accept
-    if (ssock<0) {
-      printf("Could not bind to socket=%s\n", name);
-      exit(-1);
-    }
-    for (;;) {
-      printf("Accepting on socket name=%s\n", name);
-      sock = unix_socket_accept(ssock);
-      if(sock != -1) {
-        console(sock);
-      }
-    }
-  } else {
-    struct sockaddr_un addr;
-    size_t addr_length;
-    int sock;
 
-    sock = socket(PF_UNIX, SOCK_STREAM, 0);
-    if (sock < 0) {
-      perror("Socket create failed:");
-      return -1;
-    }
-    for (;;) {
-      addr.sun_family = AF_UNIX;
-      strcpy(addr.sun_path, name);
-      addr_length = sizeof(addr.sun_family) + sprintf(addr.sun_path, "%s", name);
-      // addr_length = sizeof(addr.sun_family) + strlen(addr.sun_path);
-      int res = connect(sock, (struct sockaddr *) &addr, addr_length);
-      if (res >= 0) {
-        printf("Connected...\n");
-        console(sock);
-        // we must shutdown the socket, otherwise, it does not reconnect
-        // anymore when a new server is available... Argh !$*@$&%^@&*$^%
-        shutdown(sock, SHUT_RDWR);
-        sock = socket(PF_UNIX, SOCK_STREAM, 0);
-        if (sock < 0) {
-          perror("Socket create failed:");
-          return -1;
-        }
-      } else if (res <0) {
-        perror("Connect:");
-      }
-      usleep(100000);
-    }
-  }
 
+
+
+
+
+
+
+int main(int argc, char **argv)
+{
+	stdin_setup();
+
+	/*
+	 * Let's start by parsing the arguments.
+	 */
+	int c;
+	char *name;
+	int servermode = 0;
+
+	while ((c = getopt(argc, argv, "s:")) != EOF)
+	{
+		switch (c)
+		{
+			case 's':
+			{
+				optarg++;
+				char *coma = strchr(optarg, ',');
+				if (coma != NULL)
+				{
+					int length = coma - optarg;
+					name = malloc(length + 1);
+					strncpy(name, optarg, length);
+					name[length]='\0';
+					if (strncmp(coma + 1, "server", 6) == 0)
+					{
+						servermode = 1;
+						printf("server socket name=[%s]\n", name);
+					}
+					else
+						printf("client socket name=[%s]\n", name);
+				}
+				else
+				{
+					int length = strlen(optarg);
+					name = malloc(length + 1);
+					strcpy(name, optarg);
+					printf("client socket name=[%s]\n", name);
+				}
+				break;
+			}
+			default:
+				usage();
+		}
+	}
+	/*
+	 * Let's see if we are to act as a client, connect to a server socket
+	 * or a server, waiting for a client to connect.
+	 */
+	int sock= -1;
+	if (servermode)
+	{
+		int ssock = -1;
+		ssock = unix_socket_bind(name);
+		// fcntl(server, F_SETFL, O_NONBLOCK); // for non-blocking accept
+		if (ssock<0)
+		{
+			printf("Could not bind to socket=%s\n", name);
+			exit(-1);
+		}
+		for (;;)
+		{
+			printf("Accepting on socket name=%s\n", name);
+			sock = unix_socket_accept(ssock);
+			if(sock != -1)
+			{
+				console(sock);
+			}
+		}
+	}
+
+	else
+	{
+		struct sockaddr_un addr;
+		size_t addr_length;
+		int sock;
+
+		sock = socket(PF_UNIX, SOCK_STREAM, 0);
+		if (sock < 0)
+		{
+			perror("Socket create failed:");
+			return -1;
+		}
+		for (;;)
+		{
+			addr.sun_family = AF_UNIX;
+			strcpy(addr.sun_path, name);
+			addr_length = sizeof(addr.sun_family) + sprintf(addr.sun_path, "%s", name);
+			// addr_length = sizeof(addr.sun_family) + strlen(addr.sun_path);
+			int res = connect(sock, (struct sockaddr *) &addr, addr_length);
+			if (res >= 0)
+			{
+				printf("Connected...\n");
+				console(sock);
+				// we must shutdown the socket, otherwise, it does not reconnect
+				// anymore when a new server is available... Argh !$*@$&%^@&*$^%
+				shutdown(sock, SHUT_RDWR);
+				sock = socket(PF_UNIX, SOCK_STREAM, 0);
+				if (sock < 0)
+				{
+					perror("Socket create failed:");
+					return -1;
+				}
+			}
+			else if (res <0)
+			{
+				perror("Connect:");
+			}
+			usleep(100000);
+		}
+	}
 }

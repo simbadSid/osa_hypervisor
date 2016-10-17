@@ -4,63 +4,63 @@ In other word, this is the Instruction Set Architecture (ISA)
 of the virtual machine our hypervisor will expose to its guests. 
 
 - Memory
-  We assume a small memory of 4MB, contiguous and starting at 0x0000-0000
+	  We assume a small memory of 4MB, contiguous and starting at 0x0000-0000
 
 - Reset:
-  Power up or reset at address 0x0000-0000.
-  The MMU is turned off.
-  Interrupts are disabled.
-  Kernel mode is set.
+	  Power up or reset at address 0x0000-0000.
+	  The MMU is turned off.
+	  Interrupts are disabled.
+	  Kernel mode is set.
   
 - Registers:
-  0-15 general-purpose regs, 32bits
-  R14 is used as a frame pointer  
-  R15 stack pointer, but only by convention.
-      stack grows downward (towards smaller addresses)
-  R16 program counter
-      increments, by 4, per instruction fetched,
-      before the instruction is actually decoded and executed.
-  R17 link (holds return address when branching)
+	  0-15 general-purpose regs, 32bits
+	  R14 is used as a frame pointer  
+	  R15 stack pointer, but only by convention.
+	      stack grows downward (towards smaller addresses)
+	  R16 program counter
+	      increments, by 4, per instruction fetched,
+	      before the instruction is actually decoded and executed.
+	  R17 link (holds return address when branching)
   
 - Instructions:
-  mov reg, #value   ; 16bit value
-  mov reg,reg
-  mov reg,[reg+off] and [reg+off],reg
-  add/sub/mul/div 
-  		OP reg,reg
-  		OP reg,#value     ; 16bit value
-  branch-and-link
-     brl reg with link in R17
-  conditional branches, 
-  	 when using values, limited to 8-bit values
-  
-     beq reg1,reg2,reg3  (reg2==reg3)     -> jump to reg1
-     beq reg1,reg2,#value  (reg2==value)  -> jump to reg1
+	  mov reg, #value   ; 16bit value
+	  mov reg,reg
+	  mov reg,[reg+off] and [reg+off],reg
+	  add/sub/mul/div 
+	  		OP reg,reg
+	  		OP reg,#value     ; 16bit value
+	  branch-and-link
+	     brl reg with link in R17
+	  conditional branches, 
+	  	 when using values, limited to 8-bit values
+	  
+	     beq reg1,reg2,reg3  (reg2==reg3)     -> jump to reg1
+	     beq reg1,reg2,#value  (reg2==value)  -> jump to reg1
+	
+	     bne reg1,re2,reg3   (reg2!=reg3)  -> jump to reg1
+	     bne reg1,reg2,#value  (reg2!=value)  -> jump to reg1
+	
+	     blt reg1,reg2,reg3  (reg2<reg3)   -> jump to reg1
+	     blt reg1,reg2,#value  (reg2<value)  -> jump to reg1
+	
+	     bgt reg1,reg2,reg3  (reg2>reg3)   -> jump to reg1
+	     bgt reg1,reg2,#value  (reg2>value)  -> jump to reg1
 
-     bne reg1,re2,reg3   (reg2!=reg3)  -> jump to reg1
-     bne reg1,reg2,#value  (reg2!=value)  -> jump to reg1
-
-     blt reg1,reg2,reg3  (reg2<reg3)   -> jump to reg1
-     blt reg1,reg2,#value  (reg2<value)  -> jump to reg1
-
-     bgt reg1,reg2,reg3  (reg2>reg3)   -> jump to reg1
-     bgt reg1,reg2,#value  (reg2>value)  -> jump to reg1
-
-  and/or/xor
-  		OP reg,reg
-  		OP reg,#value   ; 16bit value
-    
-  iret  (return from interrupt).
+	  and/or/xor
+	  		OP reg,reg
+	  		OP reg,#value   ; 16bit value
+	    
+	  iret  (return from interrupt).
   
 - Special registers:
 
-    r18 status register for the CPU
-       0x01 When set, kernel mode 
-       0x02 When set, MMU translates memory addresses
-       0x04 When set, interrupts are disabled
-       0x08 When set, the current instruction has trapped
+	    r18 status register for the CPU
+	       0x01 When set, kernel mode 
+	       0x02 When set, MMU translates memory addresses
+	       0x04 When set, interrupts are disabled
+	       0x08 When set, the current instruction has trapped
        
-    r19 page table @, one level, 4K pages
+	    r19 page table @, one level, 4K pages
      
         address space: 22 bits = 4MB = 1024 * 4KB pages
 		first 12 bits = offset in the page
@@ -74,23 +74,23 @@ of the virtual machine our hypervisor will expose to its guests.
 			bit [13] :  Set if kernel protected
     
     
-    r20 interrupt vector @, with 32 entries
-    r21 interrupt mask
-	    IRQ 0 RESET
-  		IRQ 1 TIMER
-		IRQ 2 SERIAL
-    	
-	r22 trap vector @, with 32 entries
-	    TRAP-0 MEMORY_ERROR
-		TRAP-1 UNKNOWN_INSTRUCTION
-  		TRAP-2 ARITHMETIC_EXCEPTION
-		TRAP-3 PAGE_FAULT
-  
-    r23 trap extra info
-    r24 trap address (of the instruction that trapped)
-    r25 memory address, if trap is memory related
-  
-  
+	    r20 interrupt vector @, with 32 entries
+	    r21 interrupt mask
+		    IRQ 0 RESET
+	  		IRQ 1 TIMER
+			IRQ 2 SERIAL
+	    	
+		r22 trap vector @, with 32 entries
+		    TRAP-0 MEMORY_ERROR
+			TRAP-1 UNKNOWN_INSTRUCTION
+	  		TRAP-2 ARITHMETIC_EXCEPTION
+			TRAP-3 PAGE_FAULT
+	
+	    r23 trap extra info
+	    r24 trap address (of the instruction that trapped)
+	    r25 memory address, if trap is memory related
+
+
   - Hardware Devices
     One timer
       @ 0x1000 Read current time, with two reads of 32bits
@@ -105,4 +105,4 @@ of the virtual machine our hypervisor will expose to its guests.
       @ 0x1018 STATUS,
       0x01 When set, available bytes on RX
       0x02 When set, available space on TX
- 
+      

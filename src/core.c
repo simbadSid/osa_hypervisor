@@ -177,135 +177,136 @@ void decoding_loop(void)
 		bus_emul_devices();
 		check_interrupts();
 		instr = fetchi(regs, memory); // fetch and decode
-		switch (instr.op) {
-    case MOV: // mov between registers
-      regs[instr.mov.dst] = regs[instr.mov.src];
-      break;
-    case LOAD: // load immediate value
-      regs[instr.load.dst] = instr.load.value;
-      break;
-    case FETCH:
-      fetch(instr.fetch.dst, instr.fetch.src, instr.fetch.offset);
-      regs[18] &= ~STATUS_TRAPPED;
-      break;
-    case STORE:
-      store(instr.store.dst, instr.store.src, instr.store.offset);
-      regs[18] &= ~STATUS_TRAPPED;
-      break;
-    case ADD: // add
-      if (instr.arith.imm)
-        regs[instr.arith.lhr] = regs[instr.arith.lhr] + instr.arith.rhv;
-      else
-        regs[instr.arith.lhr] = regs[instr.arith.lhr] + regs[instr.arith.rhr];
-      break;
-    case SUB: // sub
-      if (instr.arith.imm)
-        regs[instr.arith.lhr] = regs[instr.arith.lhr] - instr.arith.rhv;
-      else
-        regs[instr.arith.lhr] = regs[instr.arith.lhr] - regs[instr.arith.rhr];
-      break;
-    case MUL: // mul
-      if (instr.arith.imm)
-        regs[instr.arith.lhr] = regs[instr.arith.lhr] * instr.arith.rhv;
-      else
-        regs[instr.arith.lhr] = regs[instr.arith.lhr] * regs[instr.arith.rhr];
-      break;
-    case DIV: // div
-      if (instr.arith.imm) {
-        if (instr.arith.rhv == 0) {
-          trap(TRAP_ARITHMETIC,0,0);
-          regs[18] &= ~STATUS_TRAPPED;
-          break;
-        }
-        regs[instr.arith.lhr] = regs[instr.arith.lhr] / instr.arith.rhv;
-      } else {
-        if (regs[instr.arith.rhr] == 0) {
-          trap(TRAP_ARITHMETIC,0,0);
-          regs[18] &= ~STATUS_TRAPPED;
-          break;
-        }
-        regs[instr.arith.lhr] = regs[instr.arith.lhr] / regs[instr.arith.rhr];
-      }
-      break;
-    case BRL: // branch
-      branch_and_link(instr.brl.reg);
-      break;
-    case BEQ: // conditional branch
-      if (instr.bcond.imm) {
-        if (regs[instr.bcond.lhr] == instr.bcond.rhv)
-          core->regs[16] = regs[instr.bcond.dst];
-      } else {
-        if (regs[instr.bcond.lhr] == regs[instr.bcond.rhr])
-          core->regs[16] = regs[instr.bcond.dst];
-      }
-      break;
-    case BNE: // conditional branch
-      if (instr.bcond.imm) {
-        if (regs[instr.bcond.lhr] != instr.bcond.rhv)
-          core->regs[16] = regs[instr.bcond.dst];
-      } else {
-        if (regs[instr.bcond.lhr] != regs[instr.bcond.rhr])
-          core->regs[16] = regs[instr.bcond.dst];
-      }
-      break;
-    case BLT: // conditional branch
-      if (instr.bcond.imm) {
-        if (regs[instr.bcond.lhr] < instr.bcond.rhv)
-          core->regs[16] = regs[instr.bcond.dst];
-      } else {
-        if (regs[instr.bcond.lhr] < regs[instr.bcond.rhr])
-          core->regs[16] = regs[instr.bcond.dst];
-      }
-      break;
-    case BGT: // conditional branch
-      if (instr.bcond.imm) {
-        if (regs[instr.bcond.lhr] > instr.bcond.rhv)
-          core->regs[16] = regs[instr.bcond.dst];
-      } else {
-        if (regs[instr.bcond.lhr] > regs[instr.bcond.rhr])
-          core->regs[16] = regs[instr.bcond.dst];
-      }
-      break;
-    case AND:
-      if (instr.logic.imm)
-        regs[instr.logic.lhr] = regs[instr.logic.lhr] & instr.logic.rhv;
-      else
-        regs[instr.logic.lhr] = regs[instr.logic.lhr] & regs[instr.logic.rhr];
-      break;
-    case OR:
-      if (instr.logic.imm)
-        regs[instr.logic.lhr] = regs[instr.logic.lhr] | instr.logic.rhv;
-      else
-        regs[instr.logic.lhr] = regs[instr.logic.lhr] | regs[instr.logic.rhr];
-      break;
-    case XOR:
-      if (instr.logic.imm)
-        regs[instr.logic.lhr] = regs[instr.logic.lhr] ^ instr.logic.rhv;
-      else
-        regs[instr.logic.lhr] = regs[instr.logic.lhr] ^ regs[instr.logic.rhr];
-      break;
-    case PUSH:
-      push(instr.stack.reg);
-      regs[18] &= ~STATUS_TRAPPED;
-      break;
-    case POP:
-      pop(instr.stack.reg);
-      regs[18] &= ~STATUS_TRAPPED;
-      break;
-    case HALT:
-      do {
-        bus_emul_devices();
-      } while (!check_interrupts());
-      break;
-    case IRET: // ret : return from an interrupt, restore registers that need to be
-      iret();
-      break;
-    default:
-      trap(TRAP_UNKNOWN_INSTRUCTION,0,0);
-      regs[18] &= ~STATUS_TRAPPED;
-      break;
-    }
-  }
+		switch (instr.op)
+		{
+		case MOV: // mov between registers
+		  regs[instr.mov.dst] = regs[instr.mov.src];
+		  break;
+		case LOAD: // load immediate value
+		  regs[instr.load.dst] = instr.load.value;
+		  break;
+		case FETCH:
+		  fetch(instr.fetch.dst, instr.fetch.src, instr.fetch.offset);
+		  regs[18] &= ~STATUS_TRAPPED;
+		  break;
+		case STORE:
+		  store(instr.store.dst, instr.store.src, instr.store.offset);
+		  regs[18] &= ~STATUS_TRAPPED;
+		  break;
+		case ADD: // add
+		  if (instr.arith.imm)
+			regs[instr.arith.lhr] = regs[instr.arith.lhr] + instr.arith.rhv;
+		  else
+			regs[instr.arith.lhr] = regs[instr.arith.lhr] + regs[instr.arith.rhr];
+		  break;
+		case SUB: // sub
+		  if (instr.arith.imm)
+			regs[instr.arith.lhr] = regs[instr.arith.lhr] - instr.arith.rhv;
+		  else
+			regs[instr.arith.lhr] = regs[instr.arith.lhr] - regs[instr.arith.rhr];
+		  break;
+		case MUL: // mul
+		  if (instr.arith.imm)
+			regs[instr.arith.lhr] = regs[instr.arith.lhr] * instr.arith.rhv;
+		  else
+			regs[instr.arith.lhr] = regs[instr.arith.lhr] * regs[instr.arith.rhr];
+		  break;
+		case DIV: // div
+		  if (instr.arith.imm) {
+			if (instr.arith.rhv == 0) {
+			  trap(TRAP_ARITHMETIC,0,0);
+			  regs[18] &= ~STATUS_TRAPPED;
+			  break;
+			}
+			regs[instr.arith.lhr] = regs[instr.arith.lhr] / instr.arith.rhv;
+		  } else {
+			if (regs[instr.arith.rhr] == 0) {
+			  trap(TRAP_ARITHMETIC,0,0);
+			  regs[18] &= ~STATUS_TRAPPED;
+			  break;
+			}
+			regs[instr.arith.lhr] = regs[instr.arith.lhr] / regs[instr.arith.rhr];
+		  }
+		  break;
+		case BRL: // branch
+		  branch_and_link(instr.brl.reg);
+		  break;
+		case BEQ: // conditional branch
+		  if (instr.bcond.imm) {
+			if (regs[instr.bcond.lhr] == instr.bcond.rhv)
+			  core->regs[16] = regs[instr.bcond.dst];
+		  } else {
+			if (regs[instr.bcond.lhr] == regs[instr.bcond.rhr])
+			  core->regs[16] = regs[instr.bcond.dst];
+		  }
+		  break;
+		case BNE: // conditional branch
+		  if (instr.bcond.imm) {
+			if (regs[instr.bcond.lhr] != instr.bcond.rhv)
+			  core->regs[16] = regs[instr.bcond.dst];
+		  } else {
+			if (regs[instr.bcond.lhr] != regs[instr.bcond.rhr])
+			  core->regs[16] = regs[instr.bcond.dst];
+		  }
+		  break;
+		case BLT: // conditional branch
+		  if (instr.bcond.imm) {
+			if (regs[instr.bcond.lhr] < instr.bcond.rhv)
+			  core->regs[16] = regs[instr.bcond.dst];
+		  } else {
+			if (regs[instr.bcond.lhr] < regs[instr.bcond.rhr])
+			  core->regs[16] = regs[instr.bcond.dst];
+		  }
+		  break;
+		case BGT: // conditional branch
+		  if (instr.bcond.imm) {
+			if (regs[instr.bcond.lhr] > instr.bcond.rhv)
+			  core->regs[16] = regs[instr.bcond.dst];
+		  } else {
+			if (regs[instr.bcond.lhr] > regs[instr.bcond.rhr])
+			  core->regs[16] = regs[instr.bcond.dst];
+		  }
+		  break;
+		case AND:
+		  if (instr.logic.imm)
+			regs[instr.logic.lhr] = regs[instr.logic.lhr] & instr.logic.rhv;
+		  else
+			regs[instr.logic.lhr] = regs[instr.logic.lhr] & regs[instr.logic.rhr];
+		  break;
+		case OR:
+		  if (instr.logic.imm)
+			regs[instr.logic.lhr] = regs[instr.logic.lhr] | instr.logic.rhv;
+		  else
+			regs[instr.logic.lhr] = regs[instr.logic.lhr] | regs[instr.logic.rhr];
+		  break;
+		case XOR:
+		  if (instr.logic.imm)
+			regs[instr.logic.lhr] = regs[instr.logic.lhr] ^ instr.logic.rhv;
+		  else
+			regs[instr.logic.lhr] = regs[instr.logic.lhr] ^ regs[instr.logic.rhr];
+		  break;
+		case PUSH:
+		  push(instr.stack.reg);
+		  regs[18] &= ~STATUS_TRAPPED;
+		  break;
+		case POP:
+		  pop(instr.stack.reg);
+		  regs[18] &= ~STATUS_TRAPPED;
+		  break;
+		case HALT:
+		  do {
+			bus_emul_devices();
+		  } while (!check_interrupts());
+		  break;
+		case IRET: // ret : return from an interrupt, restore registers that need to be
+		  iret();
+		  break;
+		default:
+		  trap(TRAP_UNKNOWN_INSTRUCTION,0,0);
+		  regs[18] &= ~STATUS_TRAPPED;
+		  break;
+		}
+	}
 }
 
 /**

@@ -35,9 +35,13 @@ Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 
 
 
-uint8_t *memory;   // physical memory array, allocate globally
-struct core* core; // registers and all
-struct bus* bus;   // bus and its devices.
+uint8_t			*memory;	// physical memory array, allocate globally
+struct core		*core;		// registers and all
+struct bus		*bus;		// bus and its devices.
+
+
+
+
 
 int main(int argc, char* argv[])
 {

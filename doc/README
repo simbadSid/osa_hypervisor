@@ -28,11 +28,11 @@ You are asked to do the following:
 1) You must read and understand all the sources that have been provided
    to you. This means that you should be able to explain in details how
    it works.
-   
+
 2) You are asked to add the emulation of the devices specified in the ISA.
 	- the serial line
 	- the timer
-	
+
    For the emulation of a serial line, we provided you with a program
    to emulate a serial line from within a regular linux terminal,
    please look at sockcon (sockcon.c sockcon.h).
@@ -40,8 +40,5 @@ You are asked to do the following:
 3) You are then asked to add the emulation of the MMU, as specified by the ISA.
 
 4) Check that you can run all the given samples.
-   
+
 Have fun.
-
-
-
