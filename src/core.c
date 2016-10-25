@@ -515,7 +515,37 @@ void raise_interrupt(INTERRUPTS irq) {
  *    bit [12] :  1 if write protected
  *    bit [13] :  1 if kernel protected
  */
-uint32_t mmu_translate(uint32_t addr, char mode) {
-  printf(" **** MMU is NYI ****\n");
-  exit(-1);
+uint32_t mmu_translate(uint32_t addr, char mode)
+{
+	struct virtual_address addrV;
+	struct page_table_entry pageTableEntry;
+	uint32_t *addrPageTableEntryAddr = (uint32_t*)(memory + core->regs[REGISTER_PAGE_TABLE_ADDRESS]), pageTableEntryVal;
+
+	addrV.offset			= addr & MASK_VIRTUAL_ADDRESS_OFFSET;
+	addrV.entry_nb			= (addr & MASK_VIRTUAL_ADDRESS_ENTRY_NB) >> MASK_VIRTUAL_ADDRESS_OFFSET_NB_BIT;
+	pageTableEntryVal		= *(addrPageTableEntryAddr + addrV.entry_nb);
+
+	pageTableEntry.offset	= pageTableEntryVal & 0x3FF;
+	pageTableEntry.present	= pageTableEntryVal & MMU_PRESENT;
+	pageTableEntry.read		= pageTableEntryVal	& MMU_RPROTECTED;
+	pageTableEntry.write	= pageTableEntryVal	& MMU_WPROTECTED;
+	pageTableEntry.kernel	= pageTableEntryVal	& MMU_KPROTECTED;
+
+	uint32_t infos = 0;
+	int32_t statusKernelMode = core->regs[18] & STATUS_KERNEL_MODE;
+
+	while(1)
+	{
+		if		(!pageTableEntry.present)							infos = PAGE_NOT_PRESENT;
+		else if ((mode == 'r')			&& (!pageTableEntry.read))	infos = PAGE_READ_PROTECTED;
+		else if ((mode == 'W')			&& (!pageTableEntry.write))	infos = PAGE_WRITE_PROTECTED;
+		else if ((!statusKernelMode)	&& (!pageTableEntry.kernel))infos = PAGE_KERNEL_PROTECTED;
+		else							break;
+		int32_t pc = core->regs[16];
+		trap(TRAP_PAGE_FAULT, addr, infos);
+		if (pc != core->regs[16])
+			continue;
+	}
+
+	return (pageTableEntry.offset << 12);
 }

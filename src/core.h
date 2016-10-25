@@ -62,21 +62,26 @@ struct core {
 #define MMU_WPROTECTED (1<<12)
 #define MMU_KPROTECTED (1<<13)
 
-struct page_table_entry { // address is physical
-	// 22 first bits, phys address is equal to entry_nb * 4K + offset
-	uint16_t entry_nb; // 10 bits for 1024 entries in all
-	uint16_t offset; // In a 4K page, it is 12 bits wide
-	// 10 last ones, control, 1 bit each
-	char kernel; // kernel if set, user otherwise
-	char read; // read ?
-	char write; // write ?
+#define REGISTER_PAGE_TABLE_ADDRESS	19
+struct page_table_entry		// address is physical: 22 first bits, phys address is equal to entry_nb * 4K + offset
+{
+	uint16_t entry_nb;		// 10 bits for 1024 entries in all
+	uint16_t offset;		// In a 4K page, it is 12 bits wide 10 last ones, control, 1 bit each
+	char kernel;			// kernel if set, user otherwise
+	char read;				// read ?
+	char write;				// write ?
 	char copy_on_write;
-	char present; // if not, page fault, allocate if possible, triple fault if no handler or no memory left, present is for a whole page
+	char present;			// if not, page fault, allocate if possible, triple fault if no handler or no memory left, present is for a whole page
 };
 
-struct virtual_address {
-	uint16_t entry_nb; // 10 bits, 1024 entries
-	uint16_t offset; // 12 bits, 4K bytes
+#define MASK_VIRTUAL_ADDRESS_OFFSET			0xFFF
+#define MASK_VIRTUAL_ADDRESS_ENTRY_NB		0x3FF000
+#define MASK_VIRTUAL_ADDRESS_OFFSET_NB_BIT	12
+
+struct virtual_address
+{
+	uint16_t entry_nb;		// 10 bits, 1024 entries
+	uint16_t offset;		// 12 bits, 4K bytes
 };
 
 typedef enum {

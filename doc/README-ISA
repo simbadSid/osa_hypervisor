@@ -98,7 +98,7 @@ of the virtual machine our hypervisor will expose to its guests.
       @ 0x1004 set timer, with two writes of 32 bits
                First high 32 bits, then low 32 bits. 
         	   When it reaches zero, it will raise the timer interrupt (IRQ_1)
-        	   .	
+
     One serial line...
       @ 0x1010 RX
       @ 0x1014 TX
